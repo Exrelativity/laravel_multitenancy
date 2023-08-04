@@ -1,0 +1,61 @@
+type AdminAccessToken {
+    token: String!
+}
+
+type Admin {
+    "Unique primary key."
+    id: ID!
+
+    "Non-unique name."
+    name: String!
+
+    "Unique email address."
+    email: String!
+
+    user_id: ID
+
+    current_company_id: ID
+
+    "When the email was verified."
+    email_verified_at: DateTime
+
+    "When the account was created."
+    created_at: DateTime!
+
+    "When the account was last updated."
+    updated_at: DateTime!
+}
+
+input AdminLoginInput {
+    email: String! @rules(apply: ["email"])
+    password: String!
+}
+
+extend type Mutation {
+    adminLogin(input: AdminLoginInput @spread): AdminAccessToken!
+        @field(resolver: "App\\GraphQL\\Mutations\\AdminLogin")
+
+    createAdmin(
+        "Non-unique name."
+        name: String!
+
+        "Unique email address."
+        email: String!
+
+        password: String!
+    ): Admin @guard @create
+
+    updateAdmin(
+        "Unique primary key."
+        id: ID!
+
+        "Non-unique name."
+        name: String!
+
+        current_company_id: ID
+    ): Admin @guard @Update
+}
+
+extend type Query {
+    admins: Admin @all
+}

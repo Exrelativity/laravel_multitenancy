@@ -1,0 +1,121 @@
+#import sanctum.graphql
+#import admin.graphql
+"A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`."
+scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+
+
+extend type Query {
+    me: User @auth
+
+    "Find a single user by an identifying attribute."
+    user(
+      "Search by primary key."
+      id: ID @eq @rules(apply: ["prohibits:email", "required_without:email"])
+
+      "Search by email address."
+      email: String @eq @rules(apply: ["prohibits:id", "required_without:id", "email"])
+    ): Employee @guard @find
+
+    "List multiple users."
+    users(
+      "Filters by name. Accepts SQL LIKE wildcards `%` and `_`."
+      name: String @where(operator: "like")
+    ): [Employee!]! @guard @paginate(defaultCount: 10)
+
+    products(
+      "Filters by name. Accepts SQL LIKE wildcards `%` and `_`."
+      name: String @where(operator: "like")
+    ): [Product!]! @guard @paginate(defaultCount: 10)
+
+    company: [Company] @all
+}
+
+extend type  Mutation {
+    createUser(
+    "Non-unique name."
+    name: String!,
+
+    "Unique email address."
+    email: String!,
+
+    password: String!,
+
+    company_id: ID!
+    ): Employee @guard @create
+
+
+    createCompany(
+    "Non-unique name."
+    name: String!,
+
+    "Unique email address."
+    email: String!,
+
+    password: String!,
+    ): Company @create
+
+
+
+    createProduct(
+    "Non-unique name."
+    name: String!
+
+    ): Product @guard @create
+
+}
+
+"Account of a person who utilizes this application."
+type Employee {
+    "Unique primary key."
+    id: ID!
+
+    "Non-unique name."
+    name: String!
+
+    "Unique email address."
+    email: String!
+
+    "When the email was verified."
+    email_verified_at: DateTime
+
+    "When the account was created."
+    created_at: DateTime!
+
+    "When the account was last updated."
+    updated_at: DateTime!
+}
+
+
+type Company {
+    "Unique primary key."
+    id: ID!
+
+    "Non-unique name."
+    name: String!
+
+    "Unique email address."
+    email: String!
+
+    "When the email was verified."
+    email_verified_at: DateTime
+
+    "When the account was created."
+    created_at: DateTime!
+
+    "When the account was last updated."
+    updated_at: DateTime!
+}
+
+type Product {
+    "Unique primary key."
+    id: ID!
+
+    "Non-unique name."
+    name: String!
+
+    "When the account was created."
+    created_at: DateTime!
+
+    "When the account was last updated."
+    updated_at: DateTime!
+}
