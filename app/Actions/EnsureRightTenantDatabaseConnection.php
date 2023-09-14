@@ -14,20 +14,27 @@ trait EnsureRightTenantDatabaseConnection
     protected static $company_id;
     protected static function bootEnsureRightTenantDatabaseConnection()
     {
-
         static::makeCurrent();
     }
 
     protected static function makeCurrent()
     {
         if (Auth::check()) {
-            if (config('database.connections.tenant.company_id') !== Auth::user()->company_id) {
-                static::$currentdatabase = Tenant::where("company_id", Auth::user()->company_id)->first()->database;
-                static::$company_id = Auth::user()->company_id;
+            $user = Auth::user();
+            if (config('database.connections.tenant.company_id') !== $user->company_id) {
+                static::$currentdatabase = Tenant::where("company_id", $user->company_id)->first()->database;
+                static::$company_id = $user->company_id;
+                static::configure()::use();
+            }
+
+            if (config('database.connections.tenant.database') === null) {
+                static::$currentdatabase = Tenant::where("company_id", $user->company_id)->first()->database;
+                static::$company_id = $user->company_id;
+                static::configure()::use();
             }
         }
 
-        static::configure()::use();
+       
     }
 
     protected static function forgetCurrent()
@@ -42,9 +49,10 @@ trait EnsureRightTenantDatabaseConnection
     protected static function configure()
     {
         if (Auth::check()) {
+            $user = Auth::user();
             config([
-                'database.connections.tenant.database' => static::$currentdatabase,
-                'database.connections.tenant.company_id' => static::$company_id,
+                'database.connections.tenant.database' => static::$currentdatabase ?? Tenant::where("company_id", $user->company_id)->first()->database,
+                'database.connections.tenant.company_id' => static::$company_id ?? $user->company_id,
             ]);
 
             DB::purge('tenant');

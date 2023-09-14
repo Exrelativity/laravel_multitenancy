@@ -9,7 +9,7 @@ use App\Actions\EnsureRightTenantDatabaseConnection;
 
 trait UseMyTenantDatabaseConnection
 {
-    use   EnsureRightTenantDatabaseConnection;
+    use  EnsureRightTenantDatabaseConnection;
 
     protected static function bootUseMyTenantDatabaseConnection()
     {

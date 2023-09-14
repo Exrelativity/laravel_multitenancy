@@ -10,14 +10,14 @@ trait EnsureLandLordDatabaseConnection
 {
     protected static function bootEnsureRightLandLordDatabaseConnection()
     {
-        $x = new self();
-        $x->makeCurrent();
+      
+        static::makeCurrent();
     }
 
-    protected function makeCurrent()
+    protected static function makeCurrent()
     {
 
-        $this->configure()->use();
+        static::configure()::use();
     }
 
     protected static function forgetCurrent()
@@ -29,7 +29,7 @@ trait EnsureLandLordDatabaseConnection
         Schema::connection('landlord')->getConnection()->reconnect();
     }
 
-    protected function configure()
+    protected static function configure()
     {
         DB::purge('landlord');
 
@@ -37,7 +37,7 @@ trait EnsureLandLordDatabaseConnection
 
         Schema::connection('landlord')->getConnection()->reconnect();
 
-        return $this;
+        return static::class;
 
     }
 
@@ -45,7 +45,7 @@ trait EnsureLandLordDatabaseConnection
     {
         app()->forgetInstance('landlord');
 
-        app()->instance('landlord', $this);
+        app()->instance('landlord', Static::class);
 
     }
 }
